@@ -1,0 +1,28 @@
+services:
+  backend:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/opt/pinky
+      - /opt/pinky/.venv
+
+    # Would be nice but podman compose does not support `watch` yet
+    # develop:
+    #   # Create a `watch` configuration to update the app
+    #   # https://docs.docker.com/compose/file-watch/#compose-watch-versus-bind-mounts
+    #   watch:
+    #     # Sync the working directory with the `/opt/pinky` directory in the container
+    #     - action: sync
+    #       path: .
+    #       target: /opt/pinky
+    #       # Exclude the project virtual environment — it could be for a
+    #       # different platform in the container
+    #       ignore:
+    #         - .venv/
+
+    #     # Rebuild the image if dependencies change by checking uv.lock
+    #     - action: rebuild
+    #       path: ./uv.lock
+
+    command: ["fastapi", "dev", "--host", "0.0.0.0", "main.py"]

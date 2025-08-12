@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pinky - AI Development Runtime</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 800px;
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .prompt-section {
+            margin-bottom: 30px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            resize: vertical;
+            min-height: 100px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .output-section {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #f0f0f0;
+        }
+        
+        .output-title {
+            font-size: 1.2em;
+            color: #333;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        #output {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            min-height: 200px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .agent-message {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .agent-pm { background: #e3f2fd; border-left: 4px solid #2196f3; }
+        .agent-frontend { background: #f3e5f5; border-left: 4px solid #9c27b0; }
+        .agent-backend { background: #e8f5e9; border-left: 4px solid #4caf50; }
+        .agent-devops { background: #fff3e0; border-left: 4px solid #ff9800; }
+        
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0,0,0,.1);
+            border-radius: 50%;
+            border-top-color: #667eea;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Pinky</h1>
+        <p class="subtitle">AI Development Runtime - From idea to deployed app in minutes</p>
+        
+        <div class="prompt-section">
+            <label for="prompt">What would you like to build?</label>
+            <textarea 
+                id="prompt" 
+                placeholder="Example: A modern landing page for an AI-powered dog walking service with a hero section, features, and contact form"
+            ></textarea>
+            <button id="generateBtn" onclick="generateApp()">
+                Generate & Deploy
+            </button>
+        </div>
+        
+        <div class="output-section">
+            <div class="output-title">
+                Agent Activity
+                <span id="loadingIndicator"></span>
+            </div>
+            <div id="output">Ready to create something amazing...</div>
+        </div>
+    </div>
+    
+    <script>
+        async function generateApp() {
+            const prompt = document.getElementById('prompt').value;
+            const output = document.getElementById('output');
+            const button = document.getElementById('generateBtn');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            
+            if (!prompt.trim()) {
+                alert('Please enter a description of what you want to build');
+                return;
+            }
+            
+            // Disable button and show loading
+            button.disabled = true;
+            button.textContent = 'Generating...';
+            loadingIndicator.innerHTML = '<span class="loading"></span>';
+            output.innerHTML = '';
+            
+            try {
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ prompt: prompt }),
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Generation failed');
+                }
+                
+                // Handle streaming response
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    const text = decoder.decode(value);
+                    const lines = text.split('\n');
+                    
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            try {
+                                const data = JSON.parse(line.slice(6));
+                                handleAgentMessage(data);
+                            } catch (e) {
+                                // Not JSON, might be a plain message
+                                if (line.slice(6).trim()) {
+                                    appendMessage(line.slice(6));
+                                }
+                            }
+                        }
+                    }
+                }
+                
+            } catch (error) {
+                output.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Generate & Deploy';
+                loadingIndicator.innerHTML = '';
+            }
+        }
+        
+        function handleAgentMessage(data) {
+            const output = document.getElementById('output');
+            
+            if (data.type === 'agent') {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `agent-message agent-${data.agent.toLowerCase().replace(' ', '-')}`;
+                messageDiv.innerHTML = `<strong>${data.agent}:</strong> ${data.message}`;
+                output.appendChild(messageDiv);
+            } else if (data.type === 'success') {
+                const successDiv = document.createElement('div');
+                successDiv.className = 'success';
+                successDiv.innerHTML = `✅ ${data.message}`;
+                if (data.url) {
+                    successDiv.innerHTML += `<br><br>🔗 <a href="${data.url}" target="_blank">${data.url}</a>`;
+                }
+                output.appendChild(successDiv);
+            } else if (data.type === 'error') {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error';
+                errorDiv.innerHTML = `❌ ${data.message}`;
+                output.appendChild(errorDiv);
+            }
+            
+            // Auto-scroll to bottom
+            output.scrollTop = output.scrollHeight;
+        }
+        
+        function appendMessage(message) {
+            const output = document.getElementById('output');
+            output.innerHTML += message + '\n';
+            output.scrollTop = output.scrollHeight;
+        }
+    </script>
+</body>
+</html>
